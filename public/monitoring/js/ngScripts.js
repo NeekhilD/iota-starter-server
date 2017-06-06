@@ -75,6 +75,7 @@ angular.module('systemMonitoring', ['ui.router', 'ngAnimate', 'devices'])
         $scope.areas = [
           {id: 'vegas1'  , name: 'MGM Grand, Las Vegas', center:  [-115.165571,36.102118]},
           {id: 'vegas2' ,name: 'Mandalay Bay, Las Vegas', center:  [-115.176670,36.090754]},
+          {id: 'sfc1' ,name: 'Cupertino, San Fancisco', center:    [-122.046300,37.340712]},
           {id: 'munch1'  ,name: 'Hellabrunn Zoo, Munich', center:  [11.55848,48.0993]},
           {id: 'munch2'  ,name: 'Nymphenburg Palace, Munich', center:  [11.553583,48.176656]},
           {id: 'tokyo1' ,name: 'Tokyo, Japan', center:  [139.731992,35.709026]},

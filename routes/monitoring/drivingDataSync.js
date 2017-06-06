@@ -365,12 +365,13 @@ var syncDrivingBehaviorDetails = function(trip_uuids, optionalMaxCreationCount){
  */
 router.getDenseRegionsWithBehavior = function(){
 	// 4. get driving events of high density
+	var DRIVER_EVENT_MIN_COUNT = 8;
 	var getDenseRegions = Q().then(function(){
 		var topRegions = db.view(null, 'density', {group: true, group_level: 2})
 		.then(function(topresult){
 			var topRegions = topresult.rows.filter(function(row){
 				// filter by there are multiple trip_id for a zone
-				return row.value && row.value.trips && row.value.trips.length >=2;
+				return row.value && row.value.trips && row.value.trips.length >= DRIVER_EVENT_MIN_COUNT;
 			});
 			return topRegions;
 		});
@@ -387,7 +388,7 @@ router.getDenseRegionsWithBehavior = function(){
 					});
 				return v.then(function(result){
 						var r = (result.rows || []).filter(function(row){
-							return row.value && row.value.trips && row.value.trips.length >=2; // need two or more trips in a region
+							return row.value && row.value.trips && row.value.trips.length >= DRIVER_EVENT_MIN_COUNT; // need two or more trips in a region
 						});
 						debug('  regions found: ', _.pluck(r, 'key'));
 						return r;
