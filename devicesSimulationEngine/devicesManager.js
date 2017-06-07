@@ -113,7 +113,12 @@ function devicesManager(config, server){
 		var deviceInstances = devicesByArch[arcDevice.guid];
 		_.each(deviceInstances, function(deviceInstance){
 			if(deviceInstance.iotFCredentials){
-				this.addDevice(deviceInstance);
+				try {
+					console.log("add device instance. id=" + deviceInstance.deviceID);
+					this.addDevice(deviceInstance);
+				} catch (e) {
+					console.error("error in adding device instance. id=" + deviceInstance.deviceID);
+				}
 			}
 			else
 				console.error("Unregistered device instance " + deviceInstance.guid)

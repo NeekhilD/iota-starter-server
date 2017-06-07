@@ -513,7 +513,7 @@ devicesCache.loadDevices = function(filepath){
 	
 	return Q.when("loadDevice")
 		.then(_loadDevices)
-		.then(this._cleanupIoTPlatformDevices)
+		.then(_.bind(this._cleanupIoTPlatformDevices, this))
 		['catch'](function(error){
 			console.error('failed to load devices: ', error);
 		});
@@ -540,9 +540,17 @@ devicesCache._cleanupIoTPlatformDevices = function(){
 	return devices.getAllDevices()
 	.then((function(allDevices){
 		var removeOps = allDevices.filter(function(device){
-			if(device.typeId !== 'ConnectedCarDevice') return false;
+			if (device.typeId !== 'ConnectedCarDevice') {
+				if (device.typeId) {
+					delete regDeviceIdMap[device.deviceId];
+				}
+				return false;
+			}
 			var registeredDoc = regDeviceIdMap[device.deviceId];
-			if(registeredDoc) return false; // skip as the device is in the doc.
+			if(registeredDoc) {
+				delete regDeviceIdMap[device.deviceId];
+				return false; // skip as the device is in the doc.
+			}
 			debug('    found unreferenced car device [%s].', JSON.stringify(device));
 			return true;
 		}).map(function(device){
@@ -551,6 +559,10 @@ devicesCache._cleanupIoTPlatformDevices = function(){
 			return devices.removeCredentials(device); // delete device from IoT Platform
 		});
 		debug('  removing %d unreferenced car device in IoT Platform...', removeOps.length);
+		
+		if (_.size(regDeviceIdMap) > 0) {
+			removeOps.push(devices.removeDevice(_.values(regDeviceIdMap), true));
+		}
 		return Q.allSettled(removeOps);
 	}).bind(this))
 	.then(function(){
@@ -605,6 +617,7 @@ devicesCache._saveDevices = function(){
 		});
 	};
 	
+	console.log("save registered devices...");
 	var registeredDevices = this.registeredDevicesDoc;
 	var updateDoc = function() {
 		DB.insert(registeredDevices, null, function(err, doc){
@@ -613,7 +626,7 @@ devicesCache._saveDevices = function(){
 				deferred.resolve();
 			}
 			else
-				deferred.reject();
+				deferred.reject(err);
 		});
 	};
 	
@@ -626,7 +639,7 @@ devicesCache._saveDevices = function(){
 			} else if (err.statusCode === 404) {
 				updateDoc();
 			} else {
-				deferred.reject();
+				deferred.reject(err);
 			} 
 		});
 	})
