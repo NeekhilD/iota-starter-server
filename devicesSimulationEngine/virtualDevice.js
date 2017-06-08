@@ -225,12 +225,14 @@ virtualDevice.prototype.sendMessage = function(msgName){
 
 };
 
-virtualDevice.prototype.startPeriodicAction = function(){
+virtualDevice.prototype.startPeriodicAction = function(startImmediately){
 	if(this.periodActionIntervalId)
 		return;//already running
 	if(this.onRunningCode){
 		var _this = this;
 		this.onRunningPeriodSec = (this.onRunningPeriodSec) ? this.onRunningPeriodSec : 1;
+		if (startImmediately)
+			_this.runBehaviorCode(_this.onRunningCode, "While Running");
 		this.periodActionIntervalId = setInterval(function() {
 			_this.runBehaviorCode(_this.onRunningCode, "While Running");
 		}, this.onRunningPeriodSec * 1000);
@@ -244,7 +246,7 @@ virtualDevice.prototype.stopPeriodicAction = function(){
 	}
 };
 
-virtualDevice.prototype.startPeriodicMessages = function(){
+virtualDevice.prototype.startPeriodicMessages = function(startImmediately){
 	if(this.periodicMessagesIntervals)
 		return;//already running
 	
@@ -258,6 +260,8 @@ virtualDevice.prototype.startPeriodicMessages = function(){
 				console.log("message rate is set to " + rate);
 			}
 			if (rate > 0) {
+				if (startImmediately)
+					_this.sendMessage(outPutMsg.name);
 				var intervalID = setInterval(function(){
 					_this.sendMessage(outPutMsg.name);
 				}, rate * 1000);
@@ -299,7 +303,7 @@ virtualDevice.prototype.onConnected = function(){
 	this.emit("connected", this);
 	if(this.onConnectedCode)
 		this.runBehaviorCode(this.onConnectedCode, "onConnected");
-	this.startPeriodicMessages();
+	this.startPeriodicMessages(true);
 };
 
 virtualDevice.prototype.onDisconnect = function(){
