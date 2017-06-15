@@ -29,7 +29,6 @@ The Mobility Starter Application server demonstrates how quickly you can build a
    * [Cloudant NoSQL DB](https://console.ng.bluemix.net/catalog/services/cloudant-nosql-db/)
    * [Weather Company Data for IBM Bluemix](https://console.ng.bluemix.net/catalog/services/weather-company-data-for-ibm-bluemix/)
    * [Push Notifications](https://console.ng.bluemix.net/catalog/services/push-notifications/)
-   * [Mobile Client Access](https://console.ng.bluemix.net/catalog/services/mobile-client-access/)
 
 ## Deploying the Mobility Starter Application server on Bluemix
 
@@ -140,42 +139,7 @@ You can enable push notifications when the weather at the drop off time of your 
 
 
 ### (Optional) Setting up the Mobile Client Access service
-
-The Mobililty Starter Application provides a simple custom authentication service that you can optionally use. To use the service, configure the Mobile Client Access service for Bluemix and enable the authentication.
-
-1. Start a browser and open the [Bluemix dashboard][bluemix_dashboard_url].
-
-2. Open the app.
-
-3. Click **ADD A SERVICE OR API**.
-
-4. In the catalog, select Mobile Client Access.
-
-5. Click **CREATE**.
-
-6. Open the Mobile Client Access service that you just created.
-
-7. Under **_Custom_**, click **_Configure_**.
-
-8. Enter the following authentication credentials:
--  __Realm name__ : `custauth`  
--  __Custom Identity Provider Url__ : `https://<host>.mybluemix.net`
-
-9. Click **Save**.
-
-10. Go to your [Bluemix dashboard][bluemix_dashboard_url] and open the app.
-
-11. Click ** _Environment Variables_**.
-
-12. Click **USER-DEFINED**.
-
-13. Add the following variable and then save it.  
--  __Name__ : `MCA_AUTHENTICATION`  
--  __Value__ : `true`
-
-After you enable the authentication, you can log in to the app with any user name and password credentials.
-
-For more information, see [Configuring Mobile Client Access for custom authentication](https://console.ng.bluemix.net/docs/services/mobileaccess/custom-auth-config-mca.html).
+You cannot utilize Mobile Client Access for Mobility Starter Application because Mobile Client Access service doesn't support custom authentication any more.
 
 ## Running the app
 
