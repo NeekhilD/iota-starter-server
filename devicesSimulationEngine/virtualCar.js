@@ -23,7 +23,7 @@ var IDLE_MESSAGE_INTERVAL_SEC = new Number(process.env.IDLE_MESSAGE_INTERVAL_SEC
 
 function virtualCar(deviceModel, deviceInstance, connect){
 	// Initialize necessary properties from `virtualDevice` in this instance
-	virtualDevice.call(this, deviceModel, deviceInstance, connect);
+	var proxy = virtualDevice.call(this, deviceModel, deviceInstance, connect);
 	
 	// override
 	this.onRunningCode = virtualCar.prototype.onRunningCode;
@@ -32,6 +32,7 @@ function virtualCar(deviceModel, deviceInstance, connect){
 	
 	//
 	this._resetTrip();
+	return proxy;
 };
 
 //Inherit functions from `virtualDevice`'s prototype

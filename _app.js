@@ -415,7 +415,7 @@ function startSimulation(){
 	.done();
 }
 
-var retryCount = 3;
+var retryCount = 15;
 var retryInterval = 5000;
 function _startSimulation() {
 	_.delay(function(){

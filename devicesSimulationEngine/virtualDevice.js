@@ -49,7 +49,6 @@ function virtualDevice(deviceModel, deviceInstance, connect){
 	this.deviceClient.on("command", _.bind(this.onCommand, this));
 	this.deviceClient.on("error", _.bind(this.onError, this));
 
-	Object.observe(this, _.bind(this.onPropertyChange, this))
 	//done init - run on init behavior code
 	this.onInit();
 	
@@ -59,10 +58,40 @@ function virtualDevice(deviceModel, deviceInstance, connect){
 	//if was connected then connect
 	if(deviceInstance.connected || connect)
 		this.connect();
+	return this.createProxy();
 };
 
 //Inherit functions from `EventEmitter`'s prototype
 nodeUtils.inherits(virtualDevice, EventEmitter);
+
+virtualDevice.prototype.createProxy = function(){
+	var callback = _.bind(this.onPropertyChange, this);
+	if (Object.observe) {
+		Object.observe(this, callback);
+		return this;
+	} else {
+		return new Proxy(this, {set: function(target, property, value, receiver) {
+			var oldValue = target[property];
+			if (oldValue === value) return;
+
+			var change = {name: property, type: oldValue === undefined ? 'add' : 'update', object: target};
+			if (change.type === 'update') {
+				change.oldValue = oldValue;
+			}
+			target[property] = value;
+			callback([change]);
+			return true;
+		}, deleteProperty: function(target, property, receiver) {
+			var oldValue = target[property];
+			if (oldValue === undefined) return;
+
+			var change = {name: property, type: 'delete', object: target, oldValue: oldValue};
+			delete target[property];
+			callback([change]);
+			return true;
+		}});
+	}
+};
 
 virtualDevice.prototype.resetDeviceArch = function(deviceModel){
 	//rest old arch

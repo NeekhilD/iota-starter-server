@@ -36,6 +36,7 @@ function simulationClient(config) {
 	if(config.simulationConfigFile)
 		this.loadConfiguration(config.simulationConfigFile, true);
 	this.ws = null;
+	this.retryCount = 0;
 };
 
 
@@ -420,10 +421,13 @@ simulationClient.prototype.createws = function(wsurl){
 		delete this.ws;
 	}
 	this.reconnectOnClose = true;
+	this.isConnectionOpened = false;
 	debug("createws "  + wsurl);
 	this.ws = new WebSocket(wsurl);
 
 	this.ws.on('open', _.bind(function (){
+		this.retryCount = 0;
+		this.isConnectionOpened = true;
 		if(deferred){
 			deferred.resolve('connectted');
 			deferred = null;
@@ -432,12 +436,25 @@ simulationClient.prototype.createws = function(wsurl){
 		this.emit("connectionOpen");
 	}, this));
 	this.ws.on('close', _.bind(function(code, message) {
+		this.retryCount = 0;
 		this.emit("connectionClose", code, message);
 		console.log("simulationClient: *** connection closed ***");
-		if(this.reconnectOnClose)
-			this.createws(wsurl);
+		if(this.reconnectOnClose) {
+			this.reconnect(wsurl);
+		}
 	}, this));
 	this.ws.on('error', _.bind(function(error) {
+		console.error("simulationClient: *** connection error(" + error.code + "): " + error.message + " ***");
+		if (this.reconnectOnClose && !this.isConnectionOpened) {
+			if (++this.retryCount < 10) {
+				this.reconnect(wsurl);
+				return;
+			} else {
+				this.retryCount = 0;
+				console.error("simulationClient: *** gave up reconnecting. ***");
+			}
+		}
+		this.isConnectionOpened = false;
 		this.emit("connectionError", error.code, error.message);
 		this.emit("error", {errType: "connectionError", code: error.code, message: error.message});
 		if(deferred){
@@ -449,6 +466,13 @@ simulationClient.prototype.createws = function(wsurl){
 	return deferred.promise;
 };
 
+simulationClient.prototype.reconnect = function(wsurl){
+	console.log("simulationClient: *** reconnecting... ***");
+	setTimeout(_.bind(function() {
+		this.createws(wsurl);
+	}, this), 5000);
+	return true;
+};
 
 simulationClient.prototype.sendCommand = function(cmd){
 	if(!this.ws)

@@ -644,5 +644,3 @@ var designDoc = {
 	var indexes = [{name: 'type', type: 'json', index:{fields:['type']}}];
 	router.db = db = cloudantHelper.getDeferredDB(CLOUDANT_DB_NAME, designDoc, indexes);
 }());
-
-
