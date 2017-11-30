@@ -1,42 +1,42 @@
 # IBM IoT for Automotive - Mobility Starter Application server
 
-The IBM IoT for Automotive - Mobility Starter Application is a demo app that uses the **Watson IoT Platform**, **Context Mapping**, **Driver Behavior**, and other services on **IBM Bluemix** to help you to quickly build a smart car sharing automotive solution.
+The IBM IoT for Automotive - Mobility Starter Application is a demo app that uses the **Watson IoT Platform**, **Context Mapping**, **Driver Behavior**, and other services on **IBM Cloud** to help you to quickly build a smart car sharing automotive solution.
 
 ## Overview
 
-The starter app provides a mobile app for customers to quickly find and hire a car without human intervention from a car-hire company. The server component provides features that can help car hire companies manage a pool of cars and to get insights into customer usage and requirements that can also help to attract and retain customers. 
+The starter app provides a mobile app for customers to quickly find and hire a car without human intervention from a car-hire company. The server component provides features that can help car hire companies manage a pool of cars and to get insights into customer usage and requirements that can also help to attract and retain customers.
 
-## Server component 
+## Server component
 
 The server component provides the back-end car sharing and system monitoring services. Car-hire companies can use the server component features to do the following car-hire operations tasks:
 
 - Monitor the location of all cars in the hire pool on a GIS map
 - View detailed information about each vehicle and its current status
 - View and manage customer information
-- Evaluate and score customer driving behavior 
+- Evaluate and score customer driving behavior
 
-### Mobile app 
+### Mobile app
 
 Customers who want to hire a car can use the Mobility Starter Application mobile app to search for available cars that are nearby, reserve a car, unlock the car, and then start driving the car. While you drive the car, the service tracks your location and also records your driving behavior. When you reach your driving destination, you can view information about each trip that you took in the car and you can also view your driving behavior score. You can also see how this new type of service generates vehicle data that helps automotive companies attract and retain customers.
 
 For more information about the mobile app for either iOS or Android devices, see [Deploying the mobile app](#deploy_mobile_app).
 
-The Mobility Starter Application server demonstrates how quickly you can build a car sharing solution on Bluemix by using the following services:
+The Mobility Starter Application server demonstrates how quickly you can build a car sharing solution on IBM Cloud by using the following services:
 
    * [IBM Watson IoT Context Mapping](https://console.ng.bluemix.net/catalog/services/context-mapping/)
    * [IBM Watson IoT Driver Behavior](https://console.ng.bluemix.net/catalog/services/driver-behavior/)
    * [IBM Watson IoT Platform](https://console.ng.bluemix.net/catalog/services/internet-of-things-platform/)
    * [Cloudant NoSQL DB](https://console.ng.bluemix.net/catalog/services/cloudant-nosql-db/)
-   * [Weather Company Data for IBM Bluemix](https://console.ng.bluemix.net/catalog/services/weather-company-data-for-ibm-bluemix/)
+   * [Weather Company Data for IBM Cloud](https://console.ng.bluemix.net/catalog/services/weather-company-data-for-ibm-bluemix/)
    * [Push Notifications](https://console.ng.bluemix.net/catalog/services/push-notifications/)
 
-## Deploying the Mobility Starter Application server on Bluemix
+## Deploying the Mobility Starter Application server on IBM Cloud
 
-You can automatically deploy an instance of the Mobility Starter Application server on Bluemix by clicking [![Deploy to Bluemix](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy?repository=https://github.com/ibm-watson-iot/iota-starter-server.git). You can also deploy the app manually. Note that you have to do the service activation step mentioned below after the automatic or manual deployment.
+You can automatically deploy an instance of the Mobility Starter Application server on IBM Cloud by clicking [![Deploy to Bluemix](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy?repository=https://github.com/ibm-watson-iot/iota-starter-server.git). You can also deploy the app manually. Note that you have to do the service activation step mentioned below after the automatic or manual deployment.
 
-To manually deploy your own instance of the Mobility Starter Application server on Bluemix, complete all of the following steps:
+To manually deploy your own instance of the Mobility Starter Application server on IBM Cloud, complete all of the following steps:
 
-1. Register an account on Bluemix or use an existing valid account.
+1. Register an account on IBM Cloud or use an existing valid account.
 
 2. Download and install the [Cloud-foundry CLI][cloud_foundry_url] tool.
 
@@ -63,14 +63,14 @@ To manually deploy your own instance of the Mobility Starter Application server 
   The host value is used to generate your application URL, which is in the following syntax:
   `<host>.mybluemix.net`.
 
-6. By using the command line tool, connect to Bluemix and log in when prompted.
+6. By using the command line tool, connect to IBM Cloud and log in when prompted.
 
   ```
   $ cf api https://api.ng.bluemix.net
   $ cf login
   ```
 
-7. Create an instance of Watson IoT Platform, Context Mapping, and Driver Behavior services on Bluemix.
+7. Create an instance of Watson IoT Platform, Context Mapping, and Driver Behavior services on IBM Cloud.
 
   ```
   $ cf create-service iotf-service iotf-service-free IoTPlatform
@@ -78,22 +78,22 @@ To manually deploy your own instance of the Mobility Starter Application server 
   $ cf create-service driverinsights free DriverBehavior
   ```
 
-8. Create an instance of the Cloudant NoSQL DB and the Weather Company Data services on Bluemix.
+8. Create an instance of the Cloudant NoSQL DB and the Weather Company Data services on IBM Cloud.
 
   ```
   $ cf create-service cloudantNoSQLDB Lite MobilityDB
   $ cf create-service weatherinsights Free-v2 WeatherInsights
   ```
 
-9. Push the app to Bluemix. As you will need to complete further steps when the app is deployed, be sure to use the **--no-start** argument by using the following push command:
+9. Push the app to IBM Cloud. As you will need to complete further steps when the app is deployed, be sure to use the **--no-start** argument by using the following push command:
 
   ```
   $ cf push --no-start
   ```
 
-You now have your very own instance of the IoT for Automotive - Mobility Starter Application on Bluemix.  
+You now have your very own instance of the IoT for Automotive - Mobility Starter Application on IBM Cloud.
 
-To run the car sharing Mobility Starter Application you need to install the mobile app and connect it to your server instance. You must also activate the IoT for Automotive services on Bluemix that you created earlier when you deployed your server instance and then complete the optional configuration steps.
+To run the car sharing Mobility Starter Application you need to install the mobile app and connect it to your server instance. You must also activate the IoT for Automotive services on IBM Cloud that you created earlier when you deployed your server instance and then complete the optional configuration steps.
 
 
 ## <a name="deploy_mobile_app"></a>Deploying the mobile app
@@ -107,11 +107,11 @@ To play a demo of the app, see the [Starter Experience home page](https://iot-au
 
 ### Activating the services
 
-Before you can use the application you must activate the **Context Mapping** and **Driver Behavior** services on Bluemix, as outlined in the following steps:
+Before you can use the application you must activate the **Context Mapping** and **Driver Behavior** services on IBM Cloud, as outlined in the following steps:
 
-1. Make sure that the app is not running on Bluemix. 
+1. Make sure that the app is not running on IBM Cloud.
 
-2. Open the [Bluemix dashboard][bluemix_dashboard_url] in your browser.
+2. Open the [IBM Cloud dashboard][bluemix_dashboard_url] in your browser.
 
 3. Open the **Context Mapping** service and wait for a few seconds until your credentials display.
 
@@ -121,7 +121,7 @@ Before you can use the application you must activate the **Context Mapping** and
 
 You can enable push notifications when the weather at the drop off time of your car reservation becomes bad. Complete the following steps to enable push notifications:
 
-1. Start a browser and open the [Bluemix dashboard][bluemix_dashboard_url].
+1. Start a browser and open the [IBM Cloud dashboard][bluemix_dashboard_url].
 
 2. Open the app that you created.
 
@@ -143,7 +143,7 @@ You cannot utilize Mobile Client Access for Mobility Starter Application because
 
 ## Running the app
 
-- To start your Mobility Starter Application instance, open the [Bluemix dashboard][bluemix_dashboard_url] and start the app.
+- To start your Mobility Starter Application instance, open the [IBM Cloud dashboard][bluemix_dashboard_url] and start the app.
 
 Congratulations! You are ready to use your own instance of the IoT for Automotive Starter app. Open `http://<host>.mybluemix.net/monitoring/#/settings` in your browser and follow the instructions in the mobile client connection section to connect your mobile app to the IoT for Automotive - Mobility Starter Application.
 
@@ -153,9 +153,9 @@ When you start your mobile app, you might see some simulated cars plotted at the
 
 ### Disabling the simulation engine
 
-Your physical devices can coexist with the simulated cars in the app. You can disable the simulated cars if you prefer. 
+Your physical devices can coexist with the simulated cars in the app. You can disable the simulated cars if you prefer.
 
-1. Go to your [Bluemix dashboard][bluemix_dashboard_url] and open the app.
+1. Go to your [IBM Cloud dashboard][bluemix_dashboard_url] and open the app.
 
 2. Stop the app.
 
@@ -206,8 +206,8 @@ To simplify configuration and retrieve the credentials, you can use the followin
 ```
 GET /user/device/credentials/:deviceId
 ```
-**Notes:** 
-- To call the API from your device, you must disable the Mobile Client Access service. 
+**Notes:**
+- To call the API from your device, you must disable the Mobile Client Access service.
 - The **deviceId** value is the ID that is assigned to the device. If you did not register your device by using the above step, the API will register your device automatically with the specified ID and returns the credentials for the device. In this case, the default car values, for example name, photo, and car model, are assigned automatically. The default name is __User owned car__.
 
 ### Modifying car details
@@ -272,7 +272,7 @@ The mobile app also provides capabilities to send car probe data. Therefore, ins
 
 ## Implementation
 
-The following diagram shows the components that are used by the car sharing Mobility Starter Application and the flows that exist between the components. 	
+The following diagram shows the components that are used by the car sharing Mobility Starter Application and the flows that exist between the components.
 
 ![Components and flows](docs/components_and_flow.png)
 
@@ -289,16 +289,16 @@ The following diagram shows the components that are used by the car sharing Mobi
 To report a defect with the IoT for Automotive - Mobility Starter Application server component, go to the [Issues](https://github.com/ibm-watson-iot/iota-starter-server/issues)) section.
 
 ## Troubleshooting
-To debug problems, check the Bluemix app logs. To view the logs, run the following command from the Cloud Foundry CLI:
+To debug problems, check the IBM Cloud app logs. To view the logs, run the following command from the Cloud Foundry CLI:
 
   ```
   $ cf logs <application-name> --recent
   ```
-For more detailed information on troubleshooting your application, see the [Troubleshooting section](https://www.ng.bluemix.net/docs/troubleshoot/tr.html) in the Bluemix documentation.
+For more detailed information on troubleshooting your application, see the [Troubleshooting section](https://www.ng.bluemix.net/docs/troubleshoot/tr.html) in the IBM Cloud documentation.
 
 ## Privacy Notice
 
-The IoT for Automotive Starter app includes code to track deployments to [IBM Bluemix](https://www.bluemix.net/) and other Cloud Foundry platforms. During each deployment, the following information is sent to a [Deployment Tracker](https://github.com/cloudant-labs/deployment-tracker) service:
+The IoT for Automotive Starter app includes code to track deployments to [IBM Cloud](https://www.bluemix.net/) and other Cloud Foundry platforms. During each deployment, the following information is sent to a [Deployment Tracker](https://github.com/cloudant-labs/deployment-tracker) service:
 
 * Application Name (`application_name`)
 * Space ID (`space_id`)
@@ -307,7 +307,7 @@ The IoT for Automotive Starter app includes code to track deployments to [IBM Bl
 * Labels of bound services
 * Number of instances for each bound service
 
-The tracked data is collected from the `VCAP_APPLICATION` and `VCAP_SERVICES` environment variables in IBM Bluemix and other Cloud Foundry platforms. The data is used by IBM to track metrics around deployments of sample applications to IBM Bluemix to measure the usefulness of our examples, so that we can continuously improve the content that we offer to you. Only deployments of sample applications that include code to ping the Deployment Tracker service are tracked.
+The tracked data is collected from the `VCAP_APPLICATION` and `VCAP_SERVICES` environment variables in IBM Cloud and other Cloud Foundry platforms. The data is used by IBM to track metrics around deployments of sample applications to IBM Cloud to measure the usefulness of our examples, so that we can continuously improve the content that we offer to you. Only deployments of sample applications that include code to ping the Deployment Tracker service are tracked.
 
 ### Disabling Deployment Tracking
 
@@ -317,11 +317,11 @@ You can disable the Deployment Tracking feature by removing `require("cf-deploym
 For your questions, comments or suggestions to us, visit [Watson IoT for Automotive Application community site] (https://www.ibm.com/developerworks/community/groups/service/html/communitystart?communityUuid=3b06ca1c-fd7c-4a59-a888-e5e3a8384091).
 
 ## Useful links
-[IBM Bluemix](https://bluemix.net/)  
-[IBM Bluemix Documentation](https://www.ng.bluemix.net/docs/)  
-[IBM Bluemix Developers Community](http://developer.ibm.com/bluemix)  
-[IBM Watson Internet of Things](http://www.ibm.com/internet-of-things/)  
-[IBM Watson IoT Platform](http://www.ibm.com/internet-of-things/iot-solutions/watson-iot-platform/)   
+[IBM Cloud](https://bluemix.net/)
+[IBM Cloud Documentation](https://www.ng.bluemix.net/docs/)
+[IBM Cloud Developers Community](http://developer.ibm.com/bluemix)
+[IBM Watson Internet of Things](http://www.ibm.com/internet-of-things/)
+[IBM Watson IoT Platform](http://www.ibm.com/internet-of-things/iot-solutions/watson-iot-platform/)
 [IBM Watson IoT Platform Developers Community](https://developer.ibm.com/iotplatform/)
 
 [bluemix_dashboard_url]: https://console.ng.bluemix.net/dashboard/

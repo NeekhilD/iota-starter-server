@@ -26,7 +26,7 @@ require("cf-deployment-tracker-client").track();
  */
 //global BM_APPLICATION_ID
 BM_APPLICATION_ID = appEnv.app.application_id || process.env.USER_PROVIDED_BM_APPLICATION_ID;
-if(!BM_APPLICATION_ID)
+if (!BM_APPLICATION_ID)
 	throw new Error('application_id must be provided either cfenv or USER_PROVIDED_BM_APPLICATION_ID');
 
 //global USER_PROVIDED VCAP_SERVICES contains additional vcap_services
@@ -50,7 +50,7 @@ VCAP_SERVICES = JSON.parse(process.env.VCAP_SERVICES || '{}')
 
 
 //global error handling function to dumpError referred by device simulation engine.
-dumpError = function(msg, err) {
+dumpError = function (msg, err) {
 	if (typeof err === 'object') {
 		msg = (msg) ? msg : '';
 		var message = '***********ERROR: ' + msg + ' *************\n';
@@ -117,61 +117,61 @@ app.use(function (req, res, next) {
 		'Cache-Control': 'no-store',
 		'Pragma': 'no-cache'
 	});
-	if(req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] === 'http'){
+	if (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] === 'http') {
 		res.redirect('https://' + req.headers.host + req.url);
-	} else{
+	} else {
 		next();
 	}
 });
 
 //static serve 'public' folder
-app.use(express.static(path.join(__dirname, 'public'), {extensions: ['html', 'htm']}));
+app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html', 'htm'] }));
 
 //test referer
-app.use(function(req, res, next){
+app.use(function (req, res, next) {
 	var referrer = req.headers['referer'];
-	if(!referrer){
-//		console.error('accepted due to no referrer');
+	if (!referrer) {
+		//		console.error('accepted due to no referrer');
 		return next();
 	}
-	
+
 	referrer = referrer.toLowerCase();
-	for(var i=0; i<appEnv.urls.length; i++){
+	for (var i = 0; i < appEnv.urls.length; i++) {
 		var url = appEnv.urls[i].toLowerCase();
-		if(referrer.indexOf(url, 0) === 0)
-//			console.error('accepted as the server name matched');
+		if (referrer.indexOf(url, 0) === 0)
+			//			console.error('accepted as the server name matched');
 			return next(); // accept
 	}
-	
-	if(req.method === 'GET' && req.path){
+
+	if (req.method === 'GET' && req.path) {
 		// allow link to the top page
-		if(req.path === '/') return next();
-		if(req.path === '/top') return next();
+		if (req.path === '/') return next();
+		if (req.path === '/top') return next();
 		// allow direct link to images, esp. QR code
-		if(req.path.startsWith('/admin/qr/')) return next();
+		if (req.path.startsWith('/admin/qr/')) return next();
 	}
-	
+
 	//reject
 	console.error('Rejected request as the referrer [%s] does not match to any server URLs.', referrer);
 	res.status(403).send('Unauthorized');
 });
 
 // add version
-app.use(function(req, res, next){
-	res.setHeader("iota-starter-car-sharing-version", appVersion);
+app.use(function (req, res, next) {
+	res.setHeader("Iota-Starter-Car-Sharing-Version", appVersion);
 	next();
 });
 
 //add routes
-app.use('/',           require('./routes/indexRouter.js'));
-app.use('/admin',      require('./routes/admin'));
-app.use('/user',       require('./routes/user'));
-app.use('/apps',       require('./routes/customIdentityProviderRouter.js'));
+app.use('/', require('./routes/indexRouter.js'));
+app.use('/admin', require('./routes/admin'));
+app.use('/user', require('./routes/user'));
+app.use('/apps', require('./routes/customIdentityProviderRouter.js'));
 app.use('/monitoring', require('./routes/monitoring'));
-app.use('/api',        require('./devicesSimulationEngine/api.js'));
+app.use('/api', require('./devicesSimulationEngine/api.js'));
 
 //catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
 	var err = new Error('Not Found');
 	err.status = 404;
 	next(err);
@@ -182,7 +182,7 @@ app.use(function(req, res, next) {
 //development error handler
 //will print stacktrace
 if (app.get('env') === 'development') {
-	app.use(function(err, req, res, next) {
+	app.use(function (err, req, res, next) {
 		console.error(err);
 		res.status(err.status || 500);
 		res.render('error', {
@@ -194,7 +194,7 @@ if (app.get('env') === 'development') {
 
 //production error handler
 //no stacktraces leaked to user
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
 	console.error(err);
 	res.status(err.status || 500);
 	res.render('error', {
@@ -206,7 +206,7 @@ app.use(function(err, req, res, next) {
 /**
  * Listen on provided port, on all network interfaces.
  */
-var onError,onListening;
+var onError, onListening;
 app.server.on('error', onError);
 app.server.on('listening', onListening);
 app.server.listen(port);
@@ -219,21 +219,21 @@ function onError(error) {
 	}
 
 	var bind = typeof port === 'string' ?
-			'Pipe ' + port
-			: 'Port ' + port;
+		'Pipe ' + port
+		: 'Port ' + port;
 
 	// handle specific listen errors with friendly messages
 	switch (error.code) {
-	case 'EACCES':
-		console.error(bind + ' requires elevated privileges');
-		process.exit(1);
-		break;
-	case 'EADDRINUSE':
-		console.error(bind + ' is already in use');
-		process.exit(1);
-		break;
-	default:
-		throw error;
+		case 'EACCES':
+			console.error(bind + ' requires elevated privileges');
+			process.exit(1);
+			break;
+		case 'EADDRINUSE':
+			console.error(bind + ' is already in use');
+			process.exit(1);
+			break;
+		default:
+			throw error;
 	}
 }
 
@@ -244,7 +244,7 @@ function onListening() {
 	var addr = app.server.address();
 	var bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
 	console.log('Server listening on ' + bind);
-	
+
 	// start DEMO-related activities
 	require("./_app.js");
 }

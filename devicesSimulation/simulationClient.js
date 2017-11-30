@@ -11,7 +11,7 @@ module.exports = simulationClient;
 var _ = require("underscore");
 var util = require('util');
 var EventEmitter = require('events');
-var WebSocket  = require("ws");
+var WebSocket = require("ws");
 var uuid = require("node-uuid");
 var Q = require("q");
 var fs = require('fs-extra');
@@ -25,15 +25,15 @@ function simulationClient(config) {
 		return new simulationClient(config);
 	}
 	EventEmitter.call(this);
-	config = (config) ? config :{};
-	
+	config = (config) ? config : {};
+
 	this.simulationConfig = {
-		"sessionID": (config.sessionID) ? config.sessionID :(appEnv.app.application_id || BM_APPLICATION_ID),
+		"sessionID": (config.sessionID) ? config.sessionID : (appEnv.app.application_id || BM_APPLICATION_ID),
 		"devicesSchemas": (config.devicesSchemas) ? config.devicesSchemas : [],
 		"devices": (config.devices) ? config.devices : []
 	};
-	
-	if(config.simulationConfigFile)
+
+	if (config.simulationConfigFile)
 		this.loadConfiguration(config.simulationConfigFile, true);
 	this.ws = null;
 	this.retryCount = 0;
@@ -43,153 +43,153 @@ function simulationClient(config) {
 //Inherit functions from `EventEmitter`'s prototype
 util.inherits(simulationClient, EventEmitter);
 
-simulationClient.prototype.getDevicesSchemas = function(){
+simulationClient.prototype.getDevicesSchemas = function () {
 	return this.simulationConfig.devicesSchemas;
 };
 
-simulationClient.prototype.getDevices = function(){
+simulationClient.prototype.getDevices = function () {
 	return this.simulationConfig.devices;
 };
 
-simulationClient.prototype.loadConfiguration= function(simulationConfigFile, registerDevicetypes){
-	simulationConfigFile = (simulationConfigFile) ? simulationConfigFile: "./devicesSimulation/simulationConfig.json";
+simulationClient.prototype.loadConfiguration = function (simulationConfigFile, registerDevicetypes) {
+	simulationConfigFile = (simulationConfigFile) ? simulationConfigFile : "./devicesSimulation/simulationConfig.json";
 	_.extend(this.simulationConfig, fs.readJsonSync(simulationConfigFile));
-	if(!registerDevicetypes)
+	if (!registerDevicetypes)
 		return Q(true);
 	var regDeviceTypeReqs = [];
-	_.each(this.simulationConfig.devicesSchemas, function(schema){
+	_.each(this.simulationConfig.devicesSchemas, function (schema) {
 		var iotFClient = getIotfAppClient();
-		regDeviceTypeReqs.push(iotFClient.callApi('POST', 200, true, ['device', 'types'], JSON.stringify({id: schema.name})).then(function onSuccess (response) {
+		regDeviceTypeReqs.push(iotFClient.callApi('POST', 200, true, ['device', 'types'], JSON.stringify({ id: schema.name })).then(function onSuccess(response) {
 			Q.resolve(true);
-		}, function onError (error) {
-			if(error.status == 409)
+		}, function onError(error) {
+			if (error.status == 409)
 				return true;
 			console.error(error);
 			Q.reject(error);
 		}));
 	});
-	return Q.all(regDeviceTypeReqs).then(function(res){
+	return Q.all(regDeviceTypeReqs).then(function (res) {
 		return res;
 	})
 };
 
-simulationClient.prototype.saveSimulationConfig = function(path){
+simulationClient.prototype.saveSimulationConfig = function (path) {
 	fs.writeJsonSync(path, this.simulationConfig);
 };
 
 
-simulationClient.prototype.startSimulation = function(){
+simulationClient.prototype.startSimulation = function () {
 	var _this = this;
-	var body = {simulationConfig: this.simulationConfig};
+	var body = { simulationConfig: this.simulationConfig };
 	var deferred = Q.defer();
-	callSimulationEngineAPI("POST", ["startSimulation"], body).then(function (resp){
-		Q.when(_this.createws(resp.wsurl)).then(function() {
+	callSimulationEngineAPI("POST", ["startSimulation"], body).then(function (resp) {
+		Q.when(_this.createws(resp.wsurl)).then(function () {
 			deferred.resolve();
-		})["catch"](function(err){
+		})["catch"](function (err) {
 			deferred.reject(err);
 		});
-	})["catch"](function(err){
+	})["catch"](function (err) {
 		console.error(err.message);
 		deferred.reject(err);
-//		throw new Error("Cannot start simulation " + err.message);
+		//		throw new Error("Cannot start simulation " + err.message);
 	});
 	return deferred.promise;
 };
 
-simulationClient.prototype.terminateSimulation = function(deregisterDevices){
+simulationClient.prototype.terminateSimulation = function (deregisterDevices) {
 	var deferred = Q.defer();
 	this.reconnectOnClose = false;
-	callSimulationEngineAPI("DELETE", ["terminateSimulation", this.simulationConfig.sessionID]).then(function (resp){
-		if(deregisterDevices){
+	callSimulationEngineAPI("DELETE", ["terminateSimulation", this.simulationConfig.sessionID]).then(function (resp) {
+		if (deregisterDevices) {
 			var schemaIndex = _.indexBy(this.simulationConfig.devicesSchemas, "guid");
 			var body = [];
-			_.each(this.simulationConfig.devices, function(device){
-				body.push({typeId: schemaIndex[device.archDeviceGuid].name, deviceId: device.deviceID});
+			_.each(this.simulationConfig.devices, function (device) {
+				body.push({ typeId: schemaIndex[device.archDeviceGuid].name, deviceId: device.deviceID });
 			});
 			iotFClient.callApi('POST', 200, true, ['bulk', 'devices', 'remove'], JSON.stringify(body)).then(
-					function onSuccess (response) {
-						deferred.resolve();
-					}, function onError (error) {
-						console.error(error);
-						deferred.reject(error);
-					})
+				function onSuccess(response) {
+					deferred.resolve();
+				}, function onError(error) {
+					console.error(error);
+					deferred.reject(error);
+				})
 		}
 		else
 			deferred.resolve();
-	})["catch"](function(err){
+	})["catch"](function (err) {
 		deferred.reject(err);
 	});
 	return deferred.promise;
 };
 
-simulationClient.prototype.createDevices = function(deviceType, numOfDevices, configs){
+simulationClient.prototype.createDevices = function (deviceType, numOfDevices, configs) {
 	var deferred = Q.defer();
 
 	var iotFClient = getIotfAppClient();
 
 	var nameIndex = _.indexBy(this.simulationConfig.devicesSchemas, "name");
 	var deviceSchema = nameIndex[deviceType];
-	if(!deviceSchema)
+	if (!deviceSchema)
 		deferred.reject(new Error("no such device schema " + _.escape(deviceType)));
 
 	configs = (configs) ? configs : [];
 	var bulkRegRequest = [];
-	for(var i = 0 ; i < numOfDevices; i++){
+	for (var i = 0; i < numOfDevices; i++) {
 		var config = (configs[i]) ? configs[i] : {};
 		var regReq = {
-				deviceId: (config.deviceId) ? config.deviceId : generateMacAddress(),
-				typeId: deviceType
+			deviceId: (config.deviceId) ? config.deviceId : generateMacAddress(),
+			typeId: deviceType
 		};
 		bulkRegRequest.push(regReq);
 	};
 	var _this = this;
 	iotFClient.callApi('POST', 201, true, ['bulk', 'devices', 'add'], JSON.stringify(bulkRegRequest)).then(
-			function onSuccess (responses) {
-				var result = [];
-				_.each(responses, function(response, index){
-					var config =  (configs[index]) ? configs[index] : {};
-					var device = {
-							"deviceID" : response.deviceId,
-							"archDeviceGuid": deviceSchema.guid,
-							"lastRunAttributesValues" : [],
-							"connected": (config.connected == true),
-							"iotFCredentials": {
-								"org":iotFClient.org,
-								"password": response.authToken
-							}
-					};
+		function onSuccess(responses) {
+			var result = [];
+			_.each(responses, function (response, index) {
+				var config = (configs[index]) ? configs[index] : {};
+				var device = {
+					"deviceID": response.deviceId,
+					"archDeviceGuid": deviceSchema.guid,
+					"lastRunAttributesValues": [],
+					"connected": (config.connected == true),
+					"iotFCredentials": {
+						"org": iotFClient.org,
+						"password": response.authToken
+					}
+				};
 
-					if(config.attributesInitialValues)
-						_.each(config.attributesInitialValues, function(value, name){
-							device.lastRunAttributesValues.push({name: name, value: value});
-						});
-					this.addDevice(device);
-					result.push(device);
-				}, _this);
-				deferred.resolve(result);
-			}, function onError (error) {
-				console.error(error);
-				deferred.reject(error);
+				if (config.attributesInitialValues)
+					_.each(config.attributesInitialValues, function (value, name) {
+						device.lastRunAttributesValues.push({ name: name, value: value });
+					});
+				this.addDevice(device);
+				result.push(device);
+			}, _this);
+			deferred.resolve(result);
+		}, function onError(error) {
+			console.error(error);
+			deferred.reject(error);
 
-			});
+		});
 	return deferred.promise;
 };
 
-simulationClient.prototype.getDevicesStaus= function(){
+simulationClient.prototype.getDevicesStaus = function () {
 	var deferred = Q.defer();
 	this.sendGetDeviceStatus();
 	this.getCommandResponse('deviceStatus', deferred);
 	return deferred.promise;
 };
 
-simulationClient.prototype.getDevicesSchema= function(){
+simulationClient.prototype.getDevicesSchema = function () {
 	var deferred = Q.defer();
 	this.sendGetDevicesStatus();
 	this.getCommandResponse('devicesStatus', deferred);
 	return deferred.promise;
 };
 
-simulationClient.prototype.getDeviceStaus= function(){
+simulationClient.prototype.getDeviceStaus = function () {
 	var deferred = Q.defer();
 	this.sendGetDevicesSchema();
 	this.getCommandResponse('devicesSchema', deferred);
@@ -201,48 +201,48 @@ simulationClient.prototype.getDeviceStaus= function(){
  * **************************************************************
  * connect / disconnect
  */
-simulationClient.prototype.connectDevice = function(deviceID){
-	var command = {cmdType: 'connect', deviceID: deviceID};
+simulationClient.prototype.connectDevice = function (deviceID) {
+	var command = { cmdType: 'connect', deviceID: deviceID };
 	this.sendCommand(command);
 };
 
-simulationClient.prototype.connectAllDevices = function(){
-	var command = {cmdType: 'connectAll'};
+simulationClient.prototype.connectAllDevices = function () {
+	var command = { cmdType: 'connectAll' };
 	this.sendCommand(command);
 };
 
-simulationClient.prototype.disconnectDevice = function(deviceID){
-	var command = {cmdType: 'disconnect', deviceID: deviceID};
+simulationClient.prototype.disconnectDevice = function (deviceID) {
+	var command = { cmdType: 'disconnect', deviceID: deviceID };
 	this.sendCommand(command);
 };
 
-simulationClient.prototype.disconnectAllDevices = function(){
-	var command = {cmdType: 'disconnectAll'};
+simulationClient.prototype.disconnectAllDevices = function () {
+	var command = { cmdType: 'disconnectAll' };
 	this.sendCommand(command);
 };
 
 /*
  * Add delete devices
  */
-simulationClient.prototype.addDevice = function(device){
+simulationClient.prototype.addDevice = function (device) {
 	this.simulationConfig.devices.push(device);
-	if(this.ws){
-		var command = {cmdType: 'addDevice', simulationDevice: device};
+	if (this.ws) {
+		var command = { cmdType: 'addDevice', simulationDevice: device };
 		this.sendCommand(command);
 	}
 };
 
-simulationClient.prototype.deleteDevice = function(deviceID){
+simulationClient.prototype.deleteDevice = function (deviceID) {
 	var devices;
-	for(var i = 0; i < this.simulationConfig.devices.length; i++){
-		if(this.simulationConfig.devices[i].deviceID == deviceID){
+	for (var i = 0; i < this.simulationConfig.devices.length; i++) {
+		if (this.simulationConfig.devices[i].deviceID == deviceID) {
 			this.simulationConfig.devices.splice(i, 1);
 			this.saveSimulationConfig("./simulationConfig.json");
 			break;
 		}
 	}
-	if(this.ws){
-		var command = {cmdType: 'deleteDevice', deviceID: deviceID};
+	if (this.ws) {
+		var command = { cmdType: 'deleteDevice', deviceID: deviceID };
 		this.sendCommand(command);
 	}
 };
@@ -250,38 +250,38 @@ simulationClient.prototype.deleteDevice = function(deviceID){
 /*
  * Set attributes value
  */
-simulationClient.prototype.setAttributeValue = function(deviceID, attributeName, attributeValue){
-	var command = {cmdType: 'setAttribute', deviceID: deviceID, attributeName: attributeName, attributeValue: attributeValue};
+simulationClient.prototype.setAttributeValue = function (deviceID, attributeName, attributeValue) {
+	var command = { cmdType: 'setAttribute', deviceID: deviceID, attributeName: attributeName, attributeValue: attributeValue };
 	this.sendCommand(command);
 };
 /*
  * Devices status - connection status & attributes values
  */
-simulationClient.prototype.sendGetAllDevicesStatus = function(){
-	var command = {cmdType: 'allDevicesStatus'};
+simulationClient.prototype.sendGetAllDevicesStatus = function () {
+	var command = { cmdType: 'allDevicesStatus' };
 	this.sendCommand(command);
 };
 
-simulationClient.prototype.sendGetDeviceStatus = function(deviceID){
-	var command = {cmdType: 'deviceStatus', deviceID: deviceID};
+simulationClient.prototype.sendGetDeviceStatus = function (deviceID) {
+	var command = { cmdType: 'deviceStatus', deviceID: deviceID };
 	this.sendCommand(command);
 };
 
 /*
  * Architecture devices commands
  */
-simulationClient.prototype.addArchitectureDevice = function(archDevice){
-	var command = {cmdType: 'addArchDevice', archDevice: archDevice};
+simulationClient.prototype.addArchitectureDevice = function (archDevice) {
+	var command = { cmdType: 'addArchDevice', archDevice: archDevice };
 	this.sendCommand(command);
 };
 
-simulationClient.prototype.updateArchitectureDevice = function(archDevice){
-	var command = {cmdType: 'updateArchDevice', archDevice: archDevice};
+simulationClient.prototype.updateArchitectureDevice = function (archDevice) {
+	var command = { cmdType: 'updateArchDevice', archDevice: archDevice };
 	this.sendCommand(command);
 };
 
-simulationClient.prototype.sendGetDevicesSchema = function(){
-	var command = {cmdType: 'getArchDevices'};
+simulationClient.prototype.sendGetDevicesSchema = function () {
+	var command = { cmdType: 'getArchDevices' };
 	this.sendCommand(command);
 };
 
@@ -292,7 +292,7 @@ simulationClient.prototype.sendGetDevicesSchema = function(){
  * *****************************************************************
  * simulation terminated
  */
-simulationClient.prototype.onSimulationTerminated = function(){
+simulationClient.prototype.onSimulationTerminated = function () {
 	debug("Simulation event: onSimulationTerminated");
 	this.emit("simulationTerminated");
 };
@@ -301,42 +301,42 @@ simulationClient.prototype.onSimulationTerminated = function(){
  * Connect \ Disconnect
  */
 
-simulationClient.prototype.onDeviceConnected = function(deviceID){
+simulationClient.prototype.onDeviceConnected = function (deviceID) {
 	debug("Simulation event: onDeviceConnected deviceID: " + deviceID);
 	this.emit("deviceConnected", deviceID);
 };
 
-simulationClient.prototype.onDeviceDisconnected = function(deviceID){
+simulationClient.prototype.onDeviceDisconnected = function (deviceID) {
 	debug("Simulation event: onDeviceDisconnected deviceID: " + deviceID);
 	this.emit("deviceDisconnected", deviceID);
 };
 
-simulationClient.prototype.onDeviceConnectionError = function(deviceID, errMsg, errStack){
+simulationClient.prototype.onDeviceConnectionError = function (deviceID, errMsg, errStack) {
 	debug("Simulation event: onDeviceConnectionError deviceID: " + deviceID + "errMsg: " + errMsg + " stacktrace: " + errStack);
 	this.emit("deviceConnectionError", deviceID, errMsg, errStack);
-	this.emit("error", {errType: "deviceConnectionError", deviceID: deviceID, message: errMsg, errStack: errStack});
+	this.emit("error", { errType: "deviceConnectionError", deviceID: deviceID, message: errMsg, errStack: errStack });
 };
 
 /*
  * Device Status
  */
 
-simulationClient.prototype.onNewDeviceCreated = function(device){
+simulationClient.prototype.onNewDeviceCreated = function (device) {
 	debug("Simulation event: onNewDeviceCreated : " + JSON.stringify(device, null, 4));
 	this.emit("newDevice", device);
 };
 
-simulationClient.prototype.onDeviceDeleted = function(deviceID){
+simulationClient.prototype.onDeviceDeleted = function (deviceID) {
 	debug("Simulation event: onDeviceDeleted : " + deviceID);
 	this.emit("deviceDeleted", deviceID);
 };
 
-simulationClient.prototype.onDeviceStatus = function(status){
+simulationClient.prototype.onDeviceStatus = function (status) {
 	debug("Simulation event: onDeviceStatus : " + JSON.stringify(status, null, 4));
 	this.emit("deviceStatus", status);
 };
 
-simulationClient.prototype.onAllDevicesStatus = function(status){
+simulationClient.prototype.onAllDevicesStatus = function (status) {
 	debug("Simulation event: onAllDevicesStatus : " + JSON.stringify(status, null, 4));
 	this.emit("devicesStatus", status);
 };
@@ -344,25 +344,25 @@ simulationClient.prototype.onAllDevicesStatus = function(status){
 /*
  * Attributes change
  */
-simulationClient.prototype.onAttributeValueChange = function(deviceID, attrNames2Values){
-	debug("Simulation event: onAttributeValueChange deviceID : " + deviceID + " attrNames2Values: " +JSON.stringify(attrNames2Values, null, 4));
+simulationClient.prototype.onAttributeValueChange = function (deviceID, attrNames2Values) {
+	debug("Simulation event: onAttributeValueChange deviceID : " + deviceID + " attrNames2Values: " + JSON.stringify(attrNames2Values, null, 4));
 	this.emit("attributeValueChange", deviceID, attrNames2Values);
 };
 
 /*
  * Architecture devices events
  */
-simulationClient.prototype.onDevicesSchema = function(schemas){
+simulationClient.prototype.onDevicesSchema = function (schemas) {
 	debug("Simulation event:  onArchitectureDevices: " + JSON.stringify(archDevices, null, 4));
 	this.emit("devicesSchema", schemas);
 };
 
-simulationClient.prototype.onDevicesSchemaUpdated = function(schema){
+simulationClient.prototype.onDevicesSchemaUpdated = function (schema) {
 	debug("Simulation event:  onArchitectureDeviceUpdated: " + JSON.stringify(archDevice, null, 4));
 	this.emit("deviceSchemaUpdated", schema);
 };
 
-simulationClient.prototype.onNewDeviceSchema = function(schema){
+simulationClient.prototype.onNewDeviceSchema = function (schema) {
 	debug("Simulation event:  onNewArchitectureDevice: " + JSON.stringify(archDevice, null, 4));
 	this.emit("newDeviceSchema", schema);
 };
@@ -370,16 +370,16 @@ simulationClient.prototype.onNewDeviceSchema = function(schema){
 /*
  * user code errors
  */
-simulationClient.prototype.onUserCodeError = function(deviceID, hookName, errMsg, errStack){
+simulationClient.prototype.onUserCodeError = function (deviceID, hookName, errMsg, errStack) {
 	debug("Simulation event: onUserCodeError deviceID: " + deviceID + " hookname:" + hookName + " errMsg: " + errMsg + " stacktrace: " + errStack);
-	this.emit("userCodeError",deviceID, hookName, errMsg, errStack);
-	this.emit("error", {errType: "userCodeError", deviceID: deviceID, message: errMsg, errStack: errStack, behaviourType: hookName});
+	this.emit("userCodeError", deviceID, hookName, errMsg, errStack);
+	this.emit("error", { errType: "userCodeError", deviceID: deviceID, message: errMsg, errStack: errStack, behaviourType: hookName });
 };
 
-simulationClient.prototype.onUserCodeRuntimeError = function(deviceID, hookName, errMsg, errStack){
+simulationClient.prototype.onUserCodeRuntimeError = function (deviceID, hookName, errMsg, errStack) {
 	debug("Simulation event: onUserCodeRuntimeError deviceID: " + deviceID + " hookname:" + hookName + " errMsg: " + errMsg + " stacktrace: " + errStack);
-	this.emit("userCodeRuntimeError",deviceID, hookName, errMsg, errStack);
-	this.emit("error", {errType: "userCodeRuntimeError", deviceID: deviceID, message: errMsg, errStack: errStack, behaviourType: hookName});
+	this.emit("userCodeRuntimeError", deviceID, hookName, errMsg, errStack);
+	this.emit("error", { errType: "userCodeRuntimeError", deviceID: deviceID, message: errMsg, errStack: errStack, behaviourType: hookName });
 
 };
 /*
@@ -389,9 +389,9 @@ simulationClient.prototype.onUserCodeRuntimeError = function(deviceID, hookName,
 
 //internals
 
-simulationClient.prototype.getCommandResponse= function(eventName, deferred){
+simulationClient.prototype.getCommandResponse = function (eventName, deferred) {
 	var _this = this;
-	var responselistener = function(){
+	var responselistener = function () {
 		_this.removeListener(eventName, responselistener);
 		_this.removeListener('error', errorlistener);
 		_this.removeListener('connectionClose', errorlistener);
@@ -399,7 +399,7 @@ simulationClient.prototype.getCommandResponse= function(eventName, deferred){
 		deferred.resolve.apply(arguments);
 	};
 
-	var errorlistener = function(){
+	var errorlistener = function () {
 		_this.removeListener('error', errorlistener);
 		_this.removeListener('connectionClose', errorlistener);
 		_this.removeListener('simulationTerminated', errorlistener);
@@ -413,37 +413,37 @@ simulationClient.prototype.getCommandResponse= function(eventName, deferred){
 	this.on('simulationTerminated', errorlistener);
 };
 
-simulationClient.prototype.createws = function(wsurl){
+simulationClient.prototype.createws = function (wsurl) {
 	var deferred = Q.defer();
 
-	if(this.ws){
+	if (this.ws) {
 		this.ws.terminate();
 		delete this.ws;
 	}
 	this.reconnectOnClose = true;
 	this.isConnectionOpened = false;
-	debug("createws "  + wsurl);
+	debug("createws " + wsurl);
 	this.ws = new WebSocket(wsurl);
 
-	this.ws.on('open', _.bind(function (){
+	this.ws.on('open', _.bind(function () {
 		this.retryCount = 0;
 		this.isConnectionOpened = true;
-		if(deferred){
+		if (deferred) {
 			deferred.resolve('connectted');
 			deferred = null;
 		}
 		console.log("simulationClient: *** connection open ***");
 		this.emit("connectionOpen");
 	}, this));
-	this.ws.on('close', _.bind(function(code, message) {
+	this.ws.on('close', _.bind(function (code, message) {
 		this.retryCount = 0;
 		this.emit("connectionClose", code, message);
 		console.log("simulationClient: *** connection closed ***");
-		if(this.reconnectOnClose) {
+		if (this.reconnectOnClose) {
 			this.reconnect(wsurl);
 		}
 	}, this));
-	this.ws.on('error', _.bind(function(error) {
+	this.ws.on('error', _.bind(function (error) {
 		console.error("simulationClient: *** connection error(" + error.code + "): " + error.message + " ***");
 		if (this.reconnectOnClose && !this.isConnectionOpened) {
 			if (++this.retryCount < 10) {
@@ -456,8 +456,8 @@ simulationClient.prototype.createws = function(wsurl){
 		}
 		this.isConnectionOpened = false;
 		this.emit("connectionError", error.code, error.message);
-		this.emit("error", {errType: "connectionError", code: error.code, message: error.message});
-		if(deferred){
+		this.emit("error", { errType: "connectionError", code: error.code, message: error.message });
+		if (deferred) {
 			deferred.reject(error);
 			deferred = null;
 		}
@@ -466,23 +466,23 @@ simulationClient.prototype.createws = function(wsurl){
 	return deferred.promise;
 };
 
-simulationClient.prototype.reconnect = function(wsurl){
+simulationClient.prototype.reconnect = function (wsurl) {
 	console.log("simulationClient: *** reconnecting... ***");
-	setTimeout(_.bind(function() {
+	setTimeout(_.bind(function () {
 		this.createws(wsurl);
 	}, this), 5000);
 	return true;
 };
 
-simulationClient.prototype.sendCommand = function(cmd){
-	if(!this.ws)
+simulationClient.prototype.sendCommand = function (cmd) {
+	if (!this.ws)
 		throw new Error("Not connected - cannot send command");
 	this.ws.send(JSON.stringify(cmd));
 };
 
-simulationClient.prototype.onMessage = function(msg){
+simulationClient.prototype.onMessage = function (msg) {
 	message = JSON.parse(msg);
-	if(message.error){
+	if (message.error) {
 		this.emit("simulationError", message.error);
 		message.error.errType = "simulationError";
 		this.emit("error", message.error);
@@ -491,64 +491,64 @@ simulationClient.prototype.onMessage = function(msg){
 	}
 
 	switch (message.messageType) {
-	case "simulationTerminated":
-		this.onSimulationTerminated();
-		break;
-	case "deviceStatus":
-		delete message.messageType;
-		this.onDeviceStatus(message);
-		break;
-	case "devicesStatus":
-		delete message.messageType;
-		this.onAllDevicesStatus(message);
-		break;
-	case "deviceConnected":
-		this.onDeviceConnected(message.deviceID);
-		break;
-	case "newDeviceCreated":
-		this.onNewDeviceCreated(message.device);
-	case "deviceDeleted":
-		this.onDeviceDeleted(message.deviceID);
-		break;
-	case "deviceAttributesChange":
-		this.onAttributeValueChange(message.deviceID, message.changedAttributes);
-		break;
-	case "deviceConnected":
-		this.onDeviceConnected(message.deviceID);
-		break;
-	case "deviceDisconnected":
-		this.onDeviceDisconnected(message.deviceID);
-		break;
-	case "architectureDevices":
-		this.onDevicesSchema(message.archDevices);
-		break;
-	case "architectureDeviceUpdated":
-		this.onDevicesSchemaUpdated(message.archDevice);
-		break;
-	case "newArchitectureDevice":
-		this.onNewDeviceSchema(message.archDevice);
-		break;
-	case "deviceConnectionError":
-		this.onDeviceConnectionError(message.deviceID, message.message ,message.stack);
-		break;
-	case "deviceBehaviorCodeError":
-		this.onUserCodeError(message.deviceID, message.hookName, message.message ,message.stack);
-		break;
-	case "deviceBehaviorRuntimeError":
-		this.onUserCodeRuntimeError(message.deviceID, message.hookName, message.message ,message.stack);
-		break;
-	default:
-		break;
+		case "simulationTerminated":
+			this.onSimulationTerminated();
+			break;
+		case "deviceStatus":
+			delete message.messageType;
+			this.onDeviceStatus(message);
+			break;
+		case "devicesStatus":
+			delete message.messageType;
+			this.onAllDevicesStatus(message);
+			break;
+		case "deviceConnected":
+			this.onDeviceConnected(message.deviceID);
+			break;
+		case "newDeviceCreated":
+			this.onNewDeviceCreated(message.device);
+		case "deviceDeleted":
+			this.onDeviceDeleted(message.deviceID);
+			break;
+		case "deviceAttributesChange":
+			this.onAttributeValueChange(message.deviceID, message.changedAttributes);
+			break;
+		case "deviceConnected":
+			this.onDeviceConnected(message.deviceID);
+			break;
+		case "deviceDisconnected":
+			this.onDeviceDisconnected(message.deviceID);
+			break;
+		case "architectureDevices":
+			this.onDevicesSchema(message.archDevices);
+			break;
+		case "architectureDeviceUpdated":
+			this.onDevicesSchemaUpdated(message.archDevice);
+			break;
+		case "newArchitectureDevice":
+			this.onNewDeviceSchema(message.archDevice);
+			break;
+		case "deviceConnectionError":
+			this.onDeviceConnectionError(message.deviceID, message.message, message.stack);
+			break;
+		case "deviceBehaviorCodeError":
+			this.onUserCodeError(message.deviceID, message.hookName, message.message, message.stack);
+			break;
+		case "deviceBehaviorRuntimeError":
+			this.onUserCodeRuntimeError(message.deviceID, message.hookName, message.message, message.stack);
+			break;
+		default:
+			break;
 	};
 };
 
-function callSimulationEngineAPI(method, paths, body){
+function callSimulationEngineAPI(method, paths, body) {
 	var simulationCreds;
 	var userVcapSvc = JSON.parse(process.env.USER_PROVIDED_VCAP_SERVICES || '{}');
 	var vcapSvc = userVcapSvc.devicesSimulation;
 	if (vcapSvc) {
 		simulationCreds = vcapSvc[0];
-		if(!simulationCreds.uri){
+		if (!simulationCreds.uri) {
 			// use simulation engine in this application. 
 			simulationCreds.uri = appEnv.url + "/api";
 		}
@@ -562,56 +562,57 @@ function callSimulationEngineAPI(method, paths, body){
 			apiToken: "PUT_YOUR_OWN_API_TOKEN"
 		};
 	}
-	
+
 	var uri = simulationCreds.uri;
-	if(paths){
-		for(i in paths){
-			uri += '/'+paths[i];
+	if (paths) {
+		for (i in paths) {
+			uri += '/' + paths[i];
 		}
 	}
 	return callRestApi(uri, simulationCreds.apiKey, simulationCreds.apiToken, method, JSON.stringify(body));
 };
 
-function callRestApi(uri, apiKey, apiToken, method, body, expectedHttpCode, expectJsonContent){
+function callRestApi(uri, apiKey, apiToken, method, body, expectedHttpCode, expectJsonContent) {
 	expectedHttpCode = (expectedHttpCode) ? expectedHttpCode : 200;
 	expectJsonContent = (expectJsonContent) ? expectJsonContent : true;
-	if(!_.isArray(expectedHttpCode))
+	if (!_.isArray(expectedHttpCode))
 		expectedHttpCode = [expectedHttpCode];
 
 	var deferred = Q.defer();
+	body = body || "";
 
 	request(
-			uri,
-			{
-				method: method,
-				rejectUnauthorized: true,
-				body: body,
-				auth: {
-					user: apiKey,
-					pass: apiToken,
-					sendImmediately: true
-				},
-				headers: {'Content-Type': 'application/json', "Content-Length": Buffer.byteLength(body)}
+		uri,
+		{
+			method: method,
+			rejectUnauthorized: true,
+			body: body,
+			auth: {
+				user: apiKey,
+				pass: apiToken,
+				sendImmediately: true
 			},
-			function (error, response, body) {
-				if(error){
-					deferred.reject(error);
-				}else{
-					if(expectedHttpCode.indexOf(response.statusCode) != -1){
-						if(expectJsonContent){
-							try{
-								deferred.resolve(JSON.parse(body));
-							} catch (ex){
-								deferred.reject(ex);
-							}
-						}else{
-							deferred.resolve(body);
+			headers: { 'Content-Type': 'application/json', "Content-Length": Buffer.byteLength(body) }
+		},
+		function (error, response, body) {
+			if (error) {
+				deferred.reject(error);
+			} else {
+				if (expectedHttpCode.indexOf(response.statusCode) != -1) {
+					if (expectJsonContent) {
+						try {
+							deferred.resolve(JSON.parse(body));
+						} catch (ex) {
+							deferred.reject(ex);
 						}
-					}else{
-						deferred.reject(new Error(method+" "+uri+": Expected HTTP "+expectedHttpCode+" from server but got HTTP "+response.statusCode));
+					} else {
+						deferred.resolve(body);
 					}
+				} else {
+					deferred.reject(new Error(method + " " + uri + ": Expected HTTP " + expectedHttpCode + " from server but got HTTP " + response.statusCode));
 				}
 			}
+		}
 	);
 	return deferred.promise;
 };
@@ -619,43 +620,43 @@ function callRestApi(uri, apiKey, apiToken, method, body, expectedHttpCode, expe
 
 
 var iotfAppClient = null;
-function getIotfAppClient(){
-	if(iotfAppClient)
+function getIotfAppClient() {
+	if (iotfAppClient)
 		return iotfAppClient;
 	var iotfAppClientCtor = require("ibmiotf").IotfApplication;
 	var iotFcreds = null;
-	try{
+	try {
 		iotFcreds = VCAP_SERVICES["iotf-service"][0].credentials;
 
-	}catch (e) {
+	} catch (e) {
 		throw new Error("Cannot get IoT-Foundation credentials");
 	};
 	var config = {
-			"org" : iotFcreds.apiKey.split("-")[1],
-			"id" : "hi",
-			"auth-key" : iotFcreds.apiKey,
-			"auth-token" : iotFcreds.apiToken
+		"org": iotFcreds.apiKey.split("-")[1],
+		"id": "hi",
+		"auth-key": iotFcreds.apiKey,
+		"auth-token": iotFcreds.apiToken
 	};
 	iotfAppClient = new iotfAppClientCtor(config);
 	return iotfAppClient;
 };
 
-function generateMacAddress(){
+function generateMacAddress() {
 	var mac = Math.floor(Math.random() * 16).toString(16) +
-	Math.floor(Math.random() * 16).toString(16) +
-	Math.floor(Math.random() * 16).toString(16) +
-	Math.floor(Math.random() * 16).toString(16) +
-	Math.floor(Math.random() * 16).toString(16) +
-	Math.floor(Math.random() * 16).toString(16) +
-	Math.floor(Math.random() * 16).toString(16) +
-	Math.floor(Math.random() * 16).toString(16) +
-	Math.floor(Math.random() * 16).toString(16) +
-	Math.floor(Math.random() * 16).toString(16) +
-	Math.floor(Math.random() * 16).toString(16) +
-	Math.floor(Math.random() * 16).toString(16);
+		Math.floor(Math.random() * 16).toString(16) +
+		Math.floor(Math.random() * 16).toString(16) +
+		Math.floor(Math.random() * 16).toString(16) +
+		Math.floor(Math.random() * 16).toString(16) +
+		Math.floor(Math.random() * 16).toString(16) +
+		Math.floor(Math.random() * 16).toString(16) +
+		Math.floor(Math.random() * 16).toString(16) +
+		Math.floor(Math.random() * 16).toString(16) +
+		Math.floor(Math.random() * 16).toString(16) +
+		Math.floor(Math.random() * 16).toString(16) +
+		Math.floor(Math.random() * 16).toString(16);
 	var macStr = mac[0].toUpperCase() + mac[1].toUpperCase() + mac[2].toUpperCase() + mac[3].toUpperCase() +
-	mac[4].toUpperCase() + mac[5].toUpperCase() + mac[6].toUpperCase() + mac[7].toUpperCase() +
-	mac[8].toUpperCase() + mac[9].toUpperCase() + mac[10].toUpperCase() + mac[11].toUpperCase();
+		mac[4].toUpperCase() + mac[5].toUpperCase() + mac[6].toUpperCase() + mac[7].toUpperCase() +
+		mac[8].toUpperCase() + mac[9].toUpperCase() + mac[10].toUpperCase() + mac[11].toUpperCase();
 	return macStr;
 };
 
