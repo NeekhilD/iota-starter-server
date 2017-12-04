@@ -32,7 +32,7 @@ The Mobility Starter Application server demonstrates how quickly you can build a
 
 ## Deploying the Mobility Starter Application server on IBM Cloud
 
-You can automatically deploy an instance of the Mobility Starter Application server on IBM Cloud by clicking [![Deploy to Bluemix](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy?repository=https://github.com/ibm-watson-iot/iota-starter-server.git). You can also deploy the app manually. Note that you have to do the service activation step mentioned below after the automatic or manual deployment.
+You can automatically deploy an instance of the Mobility Starter Application server on IBM Cloud by clicking [![Deploy to IBM Cloud](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy?repository=https://github.com/ibm-watson-iot/iota-starter-server.git). You can also deploy the app manually. Note that you have to do the service activation step mentioned below after the automatic or manual deployment.
 
 To manually deploy your own instance of the Mobility Starter Application server on IBM Cloud, complete all of the following steps:
 
