@@ -5,12 +5,6 @@ declared-services:
   MobilityDB: 
     label: cloudantNoSQLDB 
     plan: Lite
-  ContextMapping:
-    label: mapinsights
-    plan: free
-  DriverBehavior:
-    label: driverinsights
-    plan: free
   WeatherInsights:
     label: weatherinsights
     plan: Free-v2
@@ -19,8 +13,6 @@ applications:
   - services:
       - IoTPlatform
       - MobilityDB
-      - ContextMapping
-      - DriverBehavior
       - WeatherInsights
     disk_quota: 1024M
 #    host: iot-automotive-starter

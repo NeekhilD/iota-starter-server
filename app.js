@@ -20,7 +20,7 @@ var appEnv = require('cfenv').getAppEnv();
 var appVersion = require("./package.json").version; // This application assumes that package.json is existing and contains version number
 
 //Deployment tracker code snippet
-require("cf-deployment-tracker-client").track();
+require("metrics-tracker-client").track();
 /*
  * Define useful global variables and functions shared in this application
  */
@@ -45,7 +45,7 @@ VCAP_SERVICES = JSON.parse(process.env.VCAP_SERVICES || '{}')
  */
 // true not to use simulated car devices
 //DISABLE_DEMO_CAR_DEVICES = process.env.DISABLE_DEMO_CAR_DEVICES // _app.js
-// false to skip MCA authentication and act as "demo user" 
+// false to skip MCA authentication and act as "demo user"
 //MCA_AUTHENTICATION = process.env.MCA_AUTHENTICATION // routes/user/auth.js
 
 

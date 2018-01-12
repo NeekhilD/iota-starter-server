@@ -1,0 +1,10 @@
+id: https://github.com/ibm-watson-iot/iota-starter-server
+runtimes:
+ - Cloud Foundry
+services:
+ - Internet of Things Platform
+ - Cloudant NoSQL DB
+ - Weather Company Data for IBM Bluemix
+event_id: web
+event_organizer: dev-journeys
+language: nodejs

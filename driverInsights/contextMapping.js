@@ -17,16 +17,29 @@ var contextMapping = {
 
 	contextMappingConfig: function () {
 		var userVcapSvc = JSON.parse(process.env.USER_PROVIDED_VCAP_SERVICES || '{}');
-		var vcapSvc = userVcapSvc.mapinsights || VCAP_SERVICES.mapinsights;
+		var vcapSvc = userVcapSvc.iotforautomotive || VCAP_SERVICES.iotforautomotive;
 		if (vcapSvc) {
-			var mapCreds = vcapSvc[0].credentials;
+			var creds = vcapSvc[0].credentials;
 			return {
-				baseURL: mapCreds.api,
-				tenant_id: mapCreds.tenant_id,
-				internal_tenant_id: mapCreds.internal_tenant_id, // Workaround for DMM SaaS. DMM SaaS API needs internal_tenant_id
-				username: mapCreds.username,
-				password: mapCreds.password
+				baseURL: (creds.mapinsights && creds.mapinsights.api) ? 
+						creds.mapinsights.api : (creds.api + "mapinsights"),
+				tenant_id : creds.tenant_id,
+				internal_tenant_id: creds.internal_tenant_id, // Workaround for DMM SaaS. DMM SaaS API needs internal_tenant_id
+				username : creds.username,
+				password : creds.password
 			};
+		} else {
+			vcapSvc = userVcapSvc.mapinsights || VCAP_SERVICES.mapinsights;
+			if (vcapSvc) {
+				var mapCreds = vcapSvc[0].credentials;
+				return {
+					baseURL: mapCreds.api,
+					tenant_id: mapCreds.tenant_id,
+					internal_tenant_id: mapCreds.internal_tenant_id, // Workaround for DMM SaaS. DMM SaaS API needs internal_tenant_id
+					username: mapCreds.username,
+					password: mapCreds.password
+				};
+			}
 		}
 		throw new Error("!!! no provided credentials for MapInsights. using shared one !!!");
 	}(),

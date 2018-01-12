@@ -84,15 +84,27 @@ var driverInsightsProbe = {
 
 	driverInsightsConfig: function () {
 		var userVcapSvc = JSON.parse(process.env.USER_PROVIDED_VCAP_SERVICES || '{}');
-		var vcapSvc = userVcapSvc.driverinsights || VCAP_SERVICES.driverinsights;
+		var vcapSvc = userVcapSvc.iotforautomotive || VCAP_SERVICES.iotforautomotive;
 		if (vcapSvc) {
-			var dirverInsightsCreds = vcapSvc[0].credentials;
+			var creds = vcapSvc[0].credentials;
 			return {
-				baseURL: dirverInsightsCreds.api,
-				tenant_id: dirverInsightsCreds.tenant_id,
-				username: dirverInsightsCreds.username,
-				password: dirverInsightsCreds.password
+				baseURL: (creds.driverinsights && creds.driverinsights.api) ? 
+						creds.driverinsights.api : (creds.api + "driverinsights"),
+				tenant_id : creds.tenant_id,
+				username : creds.username,
+				password : creds.password
 			};
+		} else {
+			vcapSvc = userVcapSvc.driverinsights || VCAP_SERVICES.driverinsights;
+			if (vcapSvc) {
+				var dirverInsightsCreds = vcapSvc[0].credentials;
+				return {
+					baseURL: dirverInsightsCreds.api,
+					tenant_id: dirverInsightsCreds.tenant_id,
+					username: dirverInsightsCreds.username,
+					password: dirverInsightsCreds.password
+				};
+			}
 		}
 		throw new Exception("!!! no provided credentials for DriverInsights. using shared one !!!");
 	}(),
