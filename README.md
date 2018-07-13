@@ -1,6 +1,6 @@
-# IBM IoT for Automotive - Mobility Starter Application server
+# IBM IoT Connected Vehicle Insights - Mobility Starter Application server
 
-The Fleet Management Starter Application for the IBM® IoT for Automotive SaaS offering demonstrates how quickly you can build a smart car sharing automotive solution on IBM Cloud.
+The Fleet Management Starter Application for the IBM® IoT Connected Vehicle Insights SaaS offering demonstrates how quickly you can build a smart car sharing automotive solution on IBM Cloud.
 
 ## Overview
 
@@ -83,11 +83,11 @@ To manually deploy your own instance of the Mobility Starter Application server 
   ```
   **Important:** When you run the `push` command, you must include the `--no-start` option as you must complete further steps manually before you start the app.
 
-### Configuring IBM IoT for Automotive endpoints and credentials
-To connect to your IBM IoT for Automotive service instance, the starter app reads the REST API endpoints and credentials from an environment variable on IBM Cloud. Configure the environment variables as follows:
+### Configuring IBM IoT Connected Vehicle Insights endpoints and credentials
+To connect to your IBM IoT Connected Vehicle Insights service instance, the starter app reads the REST API endpoints and credentials from an environment variable on IBM Cloud. Configure the environment variables as follows:
 
 1. Open the [IBM Cloud dashboard][bluemix_dashboard_url] in your browser.
-1. Open the IBM IoT for Automotive service.
+1. Open the IBM IoT Connected Vehicle Insights service.
 1. Select **Runtime** tab at the left navigation bar.
 1. Click **Environment variables**.
 1. Add the following environment variable:
@@ -101,7 +101,7 @@ Define the endpoints in the following JSON format. Note that you must remove any
     "iotforautomotive": [
         {
             "credentials": {
-                "api": <IoT for Automotive endpoint>,
+                "api": <IBM IoT Connected Vehicle Insights endpoint>,
                 "username": <user name>,
                 "password": <passsword>
             }
@@ -113,12 +113,12 @@ To obtain the correct values, contact your system administrator.
 
 Key | Description of Value
 ----- | -----
-api | A URL to call the REST API for IoT for Automotive, which must end with a forward slash character (/)
-username | User name for accessing the Vehicle Data Hub (VDH) and other IoT for Automotive endpoints
-password | Password for accessing the VDH and other IoT for Automotive endpoints
+api | A URL to call the REST API for IBM IoT Connected Vehicle Insights, which must end with a forward slash character (/)
+username | User name for accessing the Vehicle Data Hub (VDH) and other IBM IoT Connected Vehicle Insights endpoints
+password | Password for accessing the VDH and other IBM IoT Connected Vehicle Insights endpoints
 
 
-You now have your very own instance of the IoT for Automotive - Mobility Starter Application on IBM Cloud. To run the car sharing Mobility Starter Application you need to install the mobile app and connect it to your server instance.
+You now have your very own instance of the IBM IoT Connected Vehicle Insights - Mobility Starter Application on IBM Cloud. To run the car sharing Mobility Starter Application you need to install the mobile app and connect it to your server instance.
 
 ## <a name="deploy_mobile_app"></a>Deploying the mobile app
 
@@ -158,7 +158,7 @@ You cannot utilize Mobile Client Access for Mobility Starter Application because
 
 - To start your Mobility Starter Application instance, open the [IBM Cloud dashboard][bluemix_dashboard_url] and start the app.
 
-Congratulations! You are ready to use your own instance of the IoT for Automotive Starter app. Open `http://<host>.mybluemix.net/monitoring/#/settings` in your browser and follow the instructions in the mobile client connection section to connect your mobile app to the IoT for Automotive - Mobility Starter Application.
+Congratulations! You are ready to use your own instance of the IBM IoT Connected Vehicle Insights Starter app. Open `http://<host>.mybluemix.net/monitoring/#/settings` in your browser and follow the instructions in the mobile client connection section to connect your mobile app to the IBM IoT Connected Vehicle Insights - Mobility Starter Application.
 
 ## Connecting your own devices to the app
 
@@ -291,15 +291,15 @@ The following diagram shows the components that are used by the car sharing Mobi
 
 * **Reservation** handles a request related to a reservation. The [routes/user/reservation.js](routes/user/reservation.js) component contains  the implementation.
 * **Car Control** gets a request for controlling a car device, for example, to lock or unlock a car. It sends a command to the target car through Watson IoT Platform. The [routes/user/reservation.js](routes/user/reservation.js) component contains implementation for /carControl end point.
-* **Driver Profile** handles a request to access a driver's behavior by using IoT for Automotive SaaS offering Driver Behavior service. The [routes/user/insights.js](routes/user/insights.js) component defines the end point and the  [driverInsights/analyze.js](driverInsights/analyze.js) component contains the implementation.
-* **Driving Analysis** gets events containing probe data from registered cars through Watson IoT Platform. It then sends the probe data to the IoT for Automotive SaaS offering Context Mapping service to get the corrected location and sends the corrected location to the IoT for Automotive Driver Behaivor service to get the driver's behavior. The [driverInsights/probe.js](driverInsights/probe.js) component is the entry point to explore the implementation. It also stores the probe data to Cloudant database "trip_route" that is used to retrieve a trip route. For more information, see the  [driverInsights/tripRoutes.js](driverInsights/tripRoutes.js) component.
-* **Monitoring System** provides a dashboard showing real-time information about cars and reservations, and information about driver's behaviors extracted from probe data by IoT for Automotive SaaS offering Driver Behavior service. The Map page pulls car status and reservation information via HTTP requests, and also receives car probe events relayed by IoT Platform via Web Socket connection. The page aggregates those informations to visualize the real-time state of cars on a map. The Users page shows statistics of driving behaviors associated to users' reservations. The server side implementation periodically, every two hours by default, extracts driving behavior information from the __Reservation__ and the __Driver Profile__ components and caches them to a database. The page gets the statistics from the database via HTTP requests. The implementation includes static files in [public/monitoring](public/monitoring) folder and server-side implementations in [routes/monitoring](routes/monitoring) folder which provides the end points and data synchronization.
+* **Driver Profile** handles a request to access a driver's behavior by using IBM IoT Connected Vehicle Insights SaaS offering Driver Behavior service. The [routes/user/insights.js](routes/user/insights.js) component defines the end point and the  [driverInsights/analyze.js](driverInsights/analyze.js) component contains the implementation.
+* **Driving Analysis** gets events containing probe data from registered cars through Watson IoT Platform. It then sends the probe data to the IBM IoT Connected Vehicle Insights SaaS offering Context Mapping service to get the corrected location and sends the corrected location to the IBM IoT Connected Vehicle Insights Driver Behaivor service to get the driver's behavior. The [driverInsights/probe.js](driverInsights/probe.js) component is the entry point to explore the implementation. It also stores the probe data to Cloudant database "trip_route" that is used to retrieve a trip route. For more information, see the  [driverInsights/tripRoutes.js](driverInsights/tripRoutes.js) component.
+* **Monitoring System** provides a dashboard showing real-time information about cars and reservations, and information about driver's behaviors extracted from probe data by IBM IoT Connected Vehicle Insights SaaS offering Driver Behavior service. The Map page pulls car status and reservation information via HTTP requests, and also receives car probe events relayed by IoT Platform via Web Socket connection. The page aggregates those informations to visualize the real-time state of cars on a map. The Users page shows statistics of driving behaviors associated to users' reservations. The server side implementation periodically, every two hours by default, extracts driving behavior information from the __Reservation__ and the __Driver Profile__ components and caches them to a database. The page gets the statistics from the database via HTTP requests. The implementation includes static files in [public/monitoring](public/monitoring) folder and server-side implementations in [routes/monitoring](routes/monitoring) folder which provides the end points and data synchronization.
 
 * **Simulated Driving Data** is preset driving data under the [devicesSimulation/data](devicesSimulation/data) folder. The data is passed to Driving Analysis directly in [devicesSimulation/simulationImporter.js](devicesSimulation/simulationImporter.js) that is called in [_app.js](_app.js).
 * **Cars (Simulator)** simulates different types of car behaviors. The implementation is under the  [devicesSimulationEngine](devicesSimulationEngine) folder.
 
 ## Reporting defects
-To report a defect with the IoT for Automotive - Mobility Starter Application server component, go to the [Issues](https://github.com/ibm-watson-iot/iota-starter-server/issues)) section.
+To report a defect with the IBM IoT Connected Vehicle Insights - Mobility Starter Application server component, go to the [Issues](https://github.com/ibm-watson-iot/iota-starter-server/issues)) section.
 
 ## Troubleshooting
 To debug problems, check the IBM Cloud app logs. To view the logs, run the following command from the Cloud Foundry CLI:
@@ -311,7 +311,7 @@ For more detailed information on troubleshooting your application, see the [Trou
 
 ## Privacy Notice
 
-The IoT for Automotive Starter app includes code to track deployments to [IBM Cloud](https://www.bluemix.net/) and other Cloud Foundry platforms. During each deployment, the following information is sent to a [Deployment Tracker](https://github.com/cloudant-labs/deployment-tracker) service:
+The IBM IoT Connected Vehicle Insights Starter app includes code to track deployments to [IBM Cloud](https://www.bluemix.net/) and other Cloud Foundry platforms. During each deployment, the following information is sent to a [Deployment Tracker](https://github.com/cloudant-labs/deployment-tracker) service:
 
 * Node.js package version
 * Node.js repository URL
@@ -333,7 +333,7 @@ This data is collected from the `package.json` and `repository.yaml` file in the
 You can disable the Deployment Tracker service by removing `require("metrics-tracker-client").track();` from the beginning of the `app.js` server file.
 
 ## Questions, comments or suggestions
-For your questions, comments or suggestions to us, visit [Watson IoT for Automotive Application community site] (https://www.ibm.com/developerworks/community/groups/service/html/communitystart?communityUuid=3b06ca1c-fd7c-4a59-a888-e5e3a8384091).
+For your questions, comments or suggestions to us, visit [IBM IoT Connected Vehicle Insights Application community site] (https://www.ibm.com/developerworks/community/groups/service/html/communitystart?communityUuid=3b06ca1c-fd7c-4a59-a888-e5e3a8384091).
 
 ## Useful links
 [IBM Cloud](https://bluemix.net/)
